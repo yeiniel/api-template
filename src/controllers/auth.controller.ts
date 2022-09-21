@@ -18,7 +18,7 @@ export const login = async (
   clientInfo: ClientInfo
 ) => {
  // Your solution here
-
+  return false;
 };
 
 export const refreshToken = async (refreshToken: string) => {
