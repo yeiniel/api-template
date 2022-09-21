@@ -2,7 +2,23 @@ import { prop, getModelForClass, ReturnModelType, plugin, Ref } from '@typegoose
 import paginate from 'mongoose-paginate-v2';
 
 // You User Model definition here
-export class User {}
+export class User {
+
+  @prop({ required: true, index: true, unique: true })
+  email!: string;
+
+  @prop({ required: true })
+  name!: string;
+
+  @prop()
+  dob?: Date;
+
+  @prop({ required: true })
+  role!: number;
+
+  @prop({ required: true })
+  password!: string;
+}
 
 const DefaultTransform = {
   schemaOptions: {
