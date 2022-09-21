@@ -18,6 +18,10 @@ export class User {
 
   @prop({ required: true })
   password!: string;
+
+  static getByEmail(this: ReturnModelType<typeof User>, email: string, flag?: boolean) {
+    return this.findOne({ email }); 
+  }
 }
 
 const DefaultTransform = {
