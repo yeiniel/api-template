@@ -2,6 +2,7 @@ import { prop, getModelForClass, ReturnModelType, plugin, Ref } from '@typegoose
 import paginate from 'mongoose-paginate-v2';
 
 // You User Model definition here
+export class User {}
 
 const DefaultTransform = {
   schemaOptions: {
