@@ -30,7 +30,7 @@
     "http-errors": "^1.8.0",
     "jsonschema": "^1.2.4",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^5.13.3",
+    "mongoose": "^5.10.18",
     "mongoose-paginate-v2": "^1.4.1",
     "multiparty": "^4.2.2",
     "oauth": "^0.9.15",
