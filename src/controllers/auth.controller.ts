@@ -18,7 +18,13 @@ export const login = async (
   clientInfo: ClientInfo
 ) => {
  // Your solution here
-  return false;
+  const user = await UserModel.getByEmail(email);
+
+  if (!user) { return false; }
+
+  if (!comparePasswords(password, user.password)) { return false; }
+
+  return { Token: createToken(user.toJSON()) };
 };
 
 export const refreshToken = async (refreshToken: string) => {
@@ -26,9 +32,9 @@ export const refreshToken = async (refreshToken: string) => {
 
 };
 
-export const register = async (user: User) => {
+export const register = async ({ password, ...user }: User) => {
   // Your solution here
-  
+  return UserModel.add({ ...user, password: hashPassword(password) });
 };
 
 export const forgotPassword = async (email: string) => {
