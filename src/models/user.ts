@@ -19,6 +19,12 @@ export class User {
   @prop({ required: true })
   password!: string;
 
+  @prop()
+  passwordResetToken?: string;
+
+  @prop()
+  passwordResetTokenExpires?: Date;
+
   static getByEmail(this: ReturnModelType<typeof User>, email: string, flag?: boolean) {
     return this.findOne({ email }); 
   }
