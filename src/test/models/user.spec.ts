@@ -20,4 +20,8 @@ describe('models/user', () => {
             });
         });
     });
+
+    afterEach(() => {
+        jest.clearAllMocks();
+    })
 });
