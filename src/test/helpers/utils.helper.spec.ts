@@ -1,6 +1,6 @@
 import { isNullOrUndefined, safelyParseJSON } from '../../helpers/utils.helper';
 
-describe('utils', () => {
+describe('helpers/utils', () => {
   describe('is null or undefined', () => {
     test('return true, null', () => {
       expect(isNullOrUndefined(null)).toBe(true);
