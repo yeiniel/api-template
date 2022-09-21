@@ -39,6 +39,13 @@ export class User {
     return this.deleteOne({ _id: id })
   }
 
+  static add(
+    this: ReturnModelType<typeof User>,
+    newUser: User
+  ) {
+    return this.create(newUser);
+  }
+
   static paginate: (
     this: ReturnModelType<typeof User>,
     query?: FilterQuery<ReturnModelType<typeof User>>,
