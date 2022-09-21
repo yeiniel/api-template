@@ -72,6 +72,24 @@ describe('models/user', () => {
                 expect(result).toBe(deleteOneSpy.mock.results[0].value);
             });
         });
+
+        describe('add', () => {
+            it('should work', () => {
+                const createSpy = jest.spyOn(UserModel, 'create').mockImplementation(() => Promise.resolve({}) as any);
+
+                const newUser = {
+                    "email": "user@example.com",
+                    "name": "Name",
+                    "role": 1,
+                    "password": "some-password"
+                };
+                const result = UserModel.add(newUser);
+
+                expect(createSpy).toHaveBeenCalledTimes(1);
+                expect(createSpy.mock.calls[0][0]).toBe(newUser);
+                expect(result).toBe(createSpy.mock.results[0].value);
+            });
+        });
     });
 
     afterEach(() => {
