@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken';
 import uuid from 'uuid';
 import { addMinutes } from 'date-fns';
 
-const createToken = (user: any) => {
+export const createToken = (user: User) => {
   return jwt.sign(user, process.env['JWT_SECRET'], {
     expiresIn: process.env['TOKEN_EXPIRES_IN'],
   });
