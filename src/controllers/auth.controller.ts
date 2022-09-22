@@ -48,10 +48,11 @@ export const refreshToken: Handler = async (req, res, next) => {
       userId: user._id,
       token: createToken(user) 
     });
-
-    return res.status(401).json({ message: 'Wrong refresh token' });
   } catch (error) {
-    next(error);
+    next(createError(
+      401, 
+      'Wrong refresh token'
+    ));
   }
 };
 
