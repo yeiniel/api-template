@@ -1,6 +1,8 @@
-import { prop, getModelForClass, ReturnModelType, plugin, Ref } from '@typegoose/typegoose';
+import { prop, getModelForClass, ReturnModelType, plugin, Ref, DocumentType } from '@typegoose/typegoose';
 import { FilterQuery, PaginateOptions, PaginateResult } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
+
+import { comparePasswords } from '../helpers/hash.helper';
 
 // You User Model definition here
 @plugin(paginate)
@@ -41,7 +43,7 @@ export class User {
 
   static add(
     this: ReturnModelType<typeof User>,
-    newUser: User
+    newUser: Omit<User, 'checkPassword'>
   ) {
     return this.create(newUser);
   }
@@ -59,6 +61,16 @@ export class User {
 
   static updateUser(this: ReturnModelType<typeof User>, id: string, payload: Partial<User>) {
     return this.updateOne({ _id: id }, payload);
+  }
+
+  /** Check whether or not password is the same one of the user
+   * 
+   * The password stored with the user record has been encrypted
+   * therefore direct equality can't be used as a comparizon
+   * measure.
+   */
+  checkPassword(this: DocumentType<User>, password: string) {
+    return comparePasswords(password, this.password);
   }
 }
 

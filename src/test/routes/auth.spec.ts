@@ -26,7 +26,7 @@ describe('routes/auth', () => {
     describe('login', () => {
         let email: string;
         let password: string;
-        let user: User;
+        let user: Omit<User, 'checkPassword'>;
 
         beforeEach(async () => {
             // setup a valid user account
