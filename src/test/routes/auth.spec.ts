@@ -81,7 +81,7 @@ describe('routes/auth', () => {
 
             expect(res.statusCode).toBe(200);
 
-            const parsedUser = jwt.decode(JSON.parse(res.text).Token);
+            const parsedUser = jwt.decode(JSON.parse(res.text).token);
             
             expect(parsedUser['email']).toEqual(user.email);
             expect(parsedUser['role']).toEqual(user.role);
