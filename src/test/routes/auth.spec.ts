@@ -38,17 +38,17 @@ describe('routes/auth', () => {
         };
     });
 
+    beforeEach(async () => {
+        jest.spyOn(UserModel, 'checkCredentials')
+            .mockImplementation((e, p) => Promise.resolve(
+                e === email && p === password 
+                    ? new UserModel(user) 
+                    : false
+            ) as never)
+    });
+
     describe('login', () => {
         const endpoint = '/api/login';
-
-        beforeEach(async () => {
-            jest.spyOn(UserModel, 'checkCredentials')
-                .mockImplementation((e, p) => Promise.resolve(
-                    e === email && p === password 
-                        ? new UserModel(user) 
-                        : false
-                ) as never)
-        });
 
         it('should fail if email and password not provided', async () => {
             const res = await request.post(endpoint);
@@ -196,7 +196,57 @@ describe('routes/auth', () => {
                 token
             });
 
-            expect(res.statusCode).toBeGreaterThanOrEqual(400);
+            expect(res.statusCode).toBe(401);
+        })
+    });
+
+    describe('validate-token', () => {
+        const endpoint = '/api/validate-token';
+        let token: string;
+
+        beforeEach(async () => {
+            const res = await request.post('/api/login').type('form').send({
+                email,
+                password
+            });
+
+            expect(res.statusCode).toBe(200);
+
+            token = JSON.parse(res.text).token;
+        });
+
+        it('should succeed if token provided', async () => {
+            const res = await request.post(endpoint).send({
+                token
+            });
+
+            expect(res.statusCode).toBe(200);
+            
+            const response = JSON.parse(res.text);
+            
+            expect(response.token).toBe(token);
+            
+            expect(response.userId).toBeDefined();
+        });
+
+        it('should fail if token is not valid', async () => {
+            // generate an expired token
+            process.env['TOKEN_EXPIRES_IN'] = '-10s';
+
+            const loginResponse = await request.post('/api/login').type('form').send({
+                email,
+                password
+            });
+
+            expect(loginResponse.statusCode).toBe(200);
+
+            token = JSON.parse(loginResponse.text).token;
+
+            const res = await request.post(endpoint).send({
+                token
+            });
+
+            expect(res.statusCode).toBe(401);
         })
     });
 
