@@ -75,7 +75,7 @@ export const register: Handler = async (req, res, next) => {
         .json({ success: true });
     } catch (error) {
       // handle the special case of an already existing user
-      if (error.message.includes('duplicate key error collection')) {
+      if (error.code === 11000) {
         throw createError(
           403, 
           'User already exists'
