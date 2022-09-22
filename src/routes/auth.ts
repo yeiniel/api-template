@@ -1,4 +1,5 @@
 import { Request, Router, Response, NextFunction } from 'express';
+import createError from 'http-errors';
 import {
   forgotPassword,
   login,
@@ -20,9 +21,11 @@ export default (app: any) => {
       if (response) {
         return res.json(response);
       }
-      return res
-        .status(401)
-        .json({ message: 'The username or password is wrong please check and try again' });
+
+      throw createError(
+        401, 
+        'The username or password is wrong please check and try again'
+      );
     } catch (error) {
       return next(error);
     }
