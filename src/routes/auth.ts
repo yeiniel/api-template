@@ -17,19 +17,7 @@ export default (app: any) => {
 
   router.post('/register', register);
 
-  router.post('/refresh-token', async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { token } = req.body;
-      // call refresh token controller
-      const response: any = await refreshToken(token);
-      if (response && response.token) {
-        return res.json(response);
-      }
-      return res.status(401).json({ message: 'Wrong refresh token' });
-    } catch (error) {
-      next(error);
-    }
-  });
+  router.post('/refresh-token', refreshToken);
 
   router.post('/forgot-password', async (req: Request, res: Response, next: NextFunction) => {
     try {

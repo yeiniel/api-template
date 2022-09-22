@@ -36,14 +36,22 @@ export const login: Handler = async (req, res, next) => {
   }
 }
 
-export const refreshToken = async (refreshToken: string) => {
-  const decodedToken = jwt.verify(refreshToken, process.env['JWT_SECRET']);
+export const refreshToken: Handler = async (req, res, next) => {
+  try {
+    const { token } = req.body;
+    
+    const decodedToken = jwt.verify(token, process.env['JWT_SECRET']);
 
-  const user = await UserModel.getByEmail(decodedToken['sub']);
+    const user = await UserModel.getByEmail(decodedToken['sub']);
 
-  return { 
-    userId: user._id,
-    token: createToken(user) 
+    return res.json({ 
+      userId: user._id,
+      token: createToken(user) 
+    });
+
+    return res.status(401).json({ message: 'Wrong refresh token' });
+  } catch (error) {
+    next(error);
   }
 };
 
