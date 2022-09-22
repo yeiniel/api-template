@@ -1,4 +1,4 @@
-import { UserModel, User } from '../models/user';
+import { UserModel } from '../models/user';
 import createError from 'http-errors';
 import { hashPassword } from '../helpers/hash.helper';
 import { Role } from '../models/role';
@@ -22,11 +22,10 @@ export const addUser = async (newUser: any, user: any) => {
         exists: true,
       };
     }
-    newUser.password = hashPassword(newUser.password);
     if (!newUser.name) {
       newUser.name = `${newUser.firstName} ${newUser.lastName}`;
     }
-    const createdUser = await UserModel.add(newUser);
+    const createdUser = await UserModel.validateAndCreate(newUser);
     if (!createdUser) {
       return null;
     }
