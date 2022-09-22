@@ -87,6 +87,32 @@ describe('routes/auth', () => {
             expect(decodedToken['sub']).toEqual(user.email);
             expect(decodedToken['role']).toEqual(user.role);
         });
+
+        it('should block account if 3 login attempts failed', async () => {
+            let wrongPassword = `wrong-password`;
+
+            await request.post(endpoint).type('form').send({
+                email,
+                password: wrongPassword
+            });
+
+            await request.post(endpoint).type('form').send({
+                email,
+                password: wrongPassword
+            });
+
+            await request.post(endpoint).type('form').send({
+                email,
+                password: wrongPassword
+            });
+            
+            const res = await request.post(endpoint).type('form').send({
+                email,
+                password
+            });
+
+            expect(res.statusCode).not.toBe(200);
+        });
     });
 
     describe('register', () => {
