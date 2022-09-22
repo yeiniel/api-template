@@ -15,20 +15,7 @@ export default (app: any) => {
 
   router.post('/login', login);
 
-  router.post('/register', async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const response: any = await register(req.body);
-      if (response && response.exists) {
-        return res.status(403).json({ success: false, message: 'User already exists' });
-      }
-      if (response) {
-        return res.status(201).json({ success: true, response });
-      }
-      return res.status(204).json({});
-    } catch (error) {
-      return next(error);
-    }
-  });
+  router.post('/register', register);
 
   router.post('/refresh-token', async (req: Request, res: Response, next: NextFunction) => {
     try {

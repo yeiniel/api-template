@@ -1,11 +1,11 @@
 import { Handler } from 'express';
 import createError from 'http-errors';
-import { User, UserModel } from '../models/user';
-import { ClientInfo, RefreshTokenModel } from '../models/refresh-token';
-import { hashPassword } from '../helpers/hash.helper';
 import jwt from 'jsonwebtoken';
 import uuid from 'uuid';
 import { addMinutes } from 'date-fns';
+
+import { User, UserModel } from '../models/user';
+import { ClientInfo, RefreshTokenModel } from '../models/refresh-token';
 
 export const createToken = (user: Pick<User, 'email' | 'role'>) => {
   return jwt.sign(user, process.env['JWT_SECRET'], {
@@ -16,6 +16,8 @@ export const createToken = (user: Pick<User, 'email' | 'role'>) => {
 export const login: Handler = async (req, res, next) => {
   try {
     const { email, password, client } = req.body;
+
+    // TODO: validate input
 
     const user = await UserModel.checkCredentials(email, password);
 
@@ -39,9 +41,37 @@ export const refreshToken = async (refreshToken: string) => {
 
 };
 
-export const register = async (user: Omit<User, 'checkPassword'>) => {
-  // Your solution here
-  return UserModel.add(user);
+export const register: Handler = async (req, res, next) => {
+  try {
+    const newUser = req.body;
+
+    if (newUser.role && typeof newUser.role === 'string') {
+      newUser.role = parseInt(newUser.role);
+    }
+
+    if (newUser.dob && typeof newUser.dob === 'string') {
+      newUser.dob = parseInt(newUser.dob);
+    }
+
+    try {
+      await UserModel.validateAndCreate(newUser);
+
+      return res.status(201)
+        .json({ success: true });
+    } catch (error) {
+      // handle the special case of an already existing user
+      if (error.message.includes('duplicate key error collection')) {
+        throw createError(
+          403, 
+          'User already exists'
+        );
+      } else {
+        throw error;
+      }
+    }
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const forgotPassword = async (email: string) => {
@@ -79,8 +109,7 @@ export const resetPassword = async (email: string, password: string, token: stri
     if (user.passwordResetTokenExpires < new Date()) {
       throw createError(403, 'There was a problem reseting your password. Token expired');
     }
-    const hashedPassword = hashPassword(password);
-    await user.updateOne({ password: hashedPassword });
+    await user.updateOne({ password });
     return { success: true };
   } catch (error) {
     throw error;

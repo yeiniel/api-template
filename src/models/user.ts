@@ -1,11 +1,32 @@
-import { prop, getModelForClass, ReturnModelType, plugin, Ref, DocumentType } from '@typegoose/typegoose';
+import { prop, getModelForClass, ReturnModelType, plugin, Ref, DocumentType, pre } from '@typegoose/typegoose';
 import { FilterQuery, PaginateOptions, PaginateResult } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
+import { Validator } from 'jsonschema';
 
-import { comparePasswords } from '../helpers/hash.helper';
+import { comparePasswords, hashPassword } from '../helpers/hash.helper';
+
+const UserJSONSchema = {
+  "id": "user",
+  "type": "object",
+  "properties": {
+    "email": { "type": "string" },
+    "password": { "type": "string" },
+    "name": { "type": "string" },
+    "role": { "type": "integer" },
+    "dob": { "type": "integer" }
+  },
+  "required": ["email", "password", "name", "role"]
+};
 
 // You User Model definition here
 @plugin(paginate)
+@pre<User>('save', async function() {
+  // end early if password is not modified
+  if (!this.isModified('password')) return;
+
+  // hash password
+  this.password = hashPassword(this.password);
+})
 export class User {
 
   @prop({ required: true, index: true, unique: true })
@@ -41,13 +62,6 @@ export class User {
     return this.deleteOne({ _id: id })
   }
 
-  static add(
-    this: ReturnModelType<typeof User>,
-    newUser: Omit<User, 'checkPassword'>
-  ) {
-    return this.create(newUser);
-  }
-
   static paginate: (
     this: ReturnModelType<typeof User>,
     query?: FilterQuery<ReturnModelType<typeof User>>,
@@ -78,6 +92,17 @@ export class User {
     const user = await this.findOne({ email });
 
     return user && user.checkPassword(password) ? user : false;
+  }
+
+  /** Validate user and create it */
+  static validateAndCreate(
+    this: ReturnModelType<typeof User>,
+    newUser: Omit<User, 'checkPassword'>
+  ) {
+    // validate user
+    (new Validator()).validate(newUser, UserJSONSchema, { throwError: true });
+
+    return this.create(newUser);
   }
 }
 

@@ -73,7 +73,7 @@ describe('models/user', () => {
             });
         });
 
-        describe('add', () => {
+        describe('validateAndCreate', () => {
             it('should work', () => {
                 const createSpy = jest.spyOn(UserModel, 'create').mockImplementation(() => Promise.resolve({}) as any);
 
@@ -83,7 +83,7 @@ describe('models/user', () => {
                     "role": 1,
                     "password": "some-password"
                 };
-                const result = UserModel.add(newUser);
+                const result = UserModel.validateAndCreate(newUser);
 
                 expect(createSpy).toHaveBeenCalledTimes(1);
                 expect(createSpy.mock.calls[0][0]).toBe(newUser);

@@ -92,7 +92,7 @@ describe('routes/auth', () => {
         const endpoint = '/api/register';
 
         beforeEach(async () => {
-            jest.spyOn(UserModel, 'add')
+            jest.spyOn(UserModel, 'create')
                 .mockImplementation(() => Promise.resolve() as never)
         });
 
