@@ -23,7 +23,7 @@ export const login: Handler = async (req, res, next) => {
 
     if(user) {
       return res.json({ 
-        Token: createToken({ email, role: user.role }) 
+        token: createToken({ email, role: user.role }) 
       });
     } else {
       throw createError(
