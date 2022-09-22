@@ -1,12 +1,12 @@
 import createError from 'http-errors';
 import { User, UserModel } from '../models/user';
 import { ClientInfo, RefreshTokenModel } from '../models/refresh-token';
-import { comparePasswords, hashPassword } from '../helpers/hash.helper';
+import { hashPassword } from '../helpers/hash.helper';
 import jwt from 'jsonwebtoken';
 import uuid from 'uuid';
 import { addMinutes } from 'date-fns';
 
-export const createToken = (user: User) => {
+export const createToken = (user: Omit<User, 'checkPassword'>) => {
   return jwt.sign(user, process.env['JWT_SECRET'], {
     expiresIn: process.env['TOKEN_EXPIRES_IN'],
   });
@@ -22,7 +22,7 @@ export const login = async (
 
   if (!user) { return false; }
 
-  if (!comparePasswords(password, user.password)) { return false; }
+  if (!user.checkPassword(password)) { return false; }
 
   return { Token: createToken(user.toJSON()) };
 };
@@ -32,7 +32,7 @@ export const refreshToken = async (refreshToken: string) => {
 
 };
 
-export const register = async ({ password, ...user }: User) => {
+export const register = async ({ password, ...user }: Omit<User, 'checkPassword'>) => {
   // Your solution here
   return UserModel.add({ ...user, password: hashPassword(password) });
 };
