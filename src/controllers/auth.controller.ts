@@ -1,3 +1,4 @@
+import { Handler } from 'express';
 import createError from 'http-errors';
 import { User, UserModel } from '../models/user';
 import { ClientInfo, RefreshTokenModel } from '../models/refresh-token';
@@ -12,24 +13,35 @@ export const createToken = (user: Pick<User, 'email' | 'role'>) => {
   });
 };
 
-export const login = async (
-  email: User['email'],
-  password: User['password'],
-  clientInfo: ClientInfo
-) => {
-  const user = await UserModel.checkCredentials(email, password);
+export const login: Handler = async (req, res, next) => {
+  try {
+    const { email, password, client } = req.body;
 
-  return user ? { Token: createToken({ email, role: user.role }) } : false;
-};
+    const user = await UserModel.checkCredentials(email, password);
+
+    if(user) {
+      return res.json({ 
+        Token: createToken({ email, role: user.role }) 
+      });
+    } else {
+      throw createError(
+        401, 
+        'The username or password is wrong please check and try again'
+      );
+    }
+  } catch (error) {
+    next(error);
+  }
+}
 
 export const refreshToken = async (refreshToken: string) => {
  // Your solution here
 
 };
 
-export const register = async ({ password, ...user }: Omit<User, 'checkPassword'>) => {
+export const register = async (user: Omit<User, 'checkPassword'>) => {
   // Your solution here
-  return UserModel.add({ ...user, password: hashPassword(password) });
+  return UserModel.add(user);
 };
 
 export const forgotPassword = async (email: string) => {
