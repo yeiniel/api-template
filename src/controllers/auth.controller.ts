@@ -38,7 +38,14 @@ export const login: Handler = async (req, res, next) => {
 
 export const refreshToken = async (refreshToken: string) => {
  // Your solution here
+  const decodedToken = jwt.decode(refreshToken);
 
+  const user = await UserModel.getByEmail(decodedToken['email']);
+
+  return { 
+    userId: user._id,
+    token: createToken({ email: user.email, role: user.role }) 
+  }
 };
 
 export const register: Handler = async (req, res, next) => {
