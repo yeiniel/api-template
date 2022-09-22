@@ -37,8 +37,7 @@ export const login: Handler = async (req, res, next) => {
 }
 
 export const refreshToken = async (refreshToken: string) => {
- // Your solution here
-  const decodedToken = jwt.decode(refreshToken);
+  const decodedToken = jwt.verify(refreshToken, process.env['JWT_SECRET']);
 
   const user = await UserModel.getByEmail(decodedToken['sub']);
 
