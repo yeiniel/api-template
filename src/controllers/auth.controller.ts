@@ -56,6 +56,26 @@ export const refreshToken: Handler = async (req, res, next) => {
   }
 };
 
+export const validateToken: Handler = async (req, res, next) => {
+  try {
+    const { token } = req.body;
+    
+    const decodedToken = jwt.verify(token, process.env['JWT_SECRET']);
+
+    const user = await UserModel.getByEmail(decodedToken['sub']);
+
+    return res.json({ 
+      userId: user._id,
+      token
+    });
+  } catch (error) {
+    next(createError(
+      401, 
+      'Wrong refresh token'
+    ));
+  }
+};
+
 export const register: Handler = async (req, res, next) => {
   try {
     const newUser = req.body;

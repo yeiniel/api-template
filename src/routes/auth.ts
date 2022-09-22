@@ -5,6 +5,7 @@ import {
   refreshToken,
   register,
   resetPassword,
+  validateToken
 } from '../controllers/auth.controller';
 
 export default (app: any) => {
@@ -18,6 +19,8 @@ export default (app: any) => {
   router.post('/register', register);
 
   router.post('/refresh-token', refreshToken);
+
+  router.post('/validate-token', validateToken);
 
   router.post('/forgot-password', async (req: Request, res: Response, next: NextFunction) => {
     try {
