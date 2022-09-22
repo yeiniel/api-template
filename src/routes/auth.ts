@@ -1,5 +1,4 @@
 import { Request, Router, Response, NextFunction } from 'express';
-import createError from 'http-errors';
 import {
   forgotPassword,
   login,
@@ -14,22 +13,7 @@ export default (app: any) => {
   // Mount route as "/api/app"
   app.use('/api', router);
 
-  router.post('/login', async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { email, password, client } = req.body;
-      const response = await login(email, password, client);
-      if (response) {
-        return res.json(response);
-      }
-
-      throw createError(
-        401, 
-        'The username or password is wrong please check and try again'
-      );
-    } catch (error) {
-      return next(error);
-    }
-  });
+  router.post('/login', login);
 
   router.post('/register', async (req: Request, res: Response, next: NextFunction) => {
     try {
