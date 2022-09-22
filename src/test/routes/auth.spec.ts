@@ -178,6 +178,26 @@ describe('routes/auth', () => {
             expect(decodedToken['sub']).toEqual(user.email);
             expect(decodedToken['role']).toEqual(user.role);
         });
+
+        it('should fail if token is not valid', async () => {
+            // generate an expired token
+            process.env['TOKEN_EXPIRES_IN'] = '-10s';
+
+            const loginResponse = await request.post('/api/login').type('form').send({
+                email,
+                password
+            });
+
+            expect(loginResponse.statusCode).toBe(200);
+
+            token = JSON.parse(loginResponse.text).token;
+
+            const res = await request.post(endpoint).send({
+                token
+            });
+
+            expect(res.statusCode).toBeGreaterThanOrEqual(400);
+        })
     });
 
     afterEach(() => { jest.clearAllMocks() })
