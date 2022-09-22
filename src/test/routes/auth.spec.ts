@@ -24,8 +24,8 @@ describe('routes/auth', () => {
     });
 
     describe('login', () => {
-        let email: string;
-        let password: string;
+        let email: User['email'];
+        let password: User['password'];
         let user: Omit<User, 'checkPassword'>;
 
         beforeEach(async () => {
@@ -39,10 +39,11 @@ describe('routes/auth', () => {
                 password: hashPassword(password)
             };
 
-            // mock UserModel methods
-            jest.spyOn(UserModel, 'getByEmail')
-                .mockImplementation((email) => Promise.resolve(
-                    email === user.email ? new UserModel(user) : undefined
+            jest.spyOn(UserModel, 'checkCredentials')
+                .mockImplementation((e, p) => Promise.resolve(
+                    e === email && p === password 
+                        ? { email, password, role: 1 } 
+                        : false
                 ) as never)
         })
 
@@ -86,8 +87,6 @@ describe('routes/auth', () => {
             );
 
             expect(parsedUser.email).toEqual(user.email);
-            expect(parsedUser.name).toEqual(user.name);
-            expect(parsedUser.password).toEqual(user.password);
             expect(parsedUser.role).toEqual(user.role);
         });
     });

@@ -69,8 +69,15 @@ export class User {
    * therefore direct equality can't be used as a comparizon
    * measure.
    */
-  checkPassword(this: DocumentType<User>, password: string) {
+  checkPassword(this: DocumentType<User>, password: User['password']) {
     return comparePasswords(password, this.password);
+  }
+
+  /** Check whether or not credentials match those of a registered user */
+  static async checkCredentials(this: ReturnModelType<typeof User>, email: User['email'], password: User['password']) {
+    const user = await this.findOne({ email });
+
+    return user && user.checkPassword(password) ? user : false;
   }
 }
 
