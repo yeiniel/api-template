@@ -7,16 +7,14 @@ describe('controllers/auth.controller', () => {
         beforeEach(async () => {
             // mock UserModel methods
             jest.spyOn(UserModel, 'getByEmail')
-                .mockImplementation((email) => Promise.resolve({ 
+                .mockImplementation((email) => Promise.resolve(new UserModel({ 
                     email, 
-                    password: 'some-password', 
-                    toJSON: () => ({ email, password: 'some-password' }) 
-                }) as never)
+                    password: 'some-password'
+                })) as never)
         })
 
         it('should return something', async () => {
             const result = await login('user@example.com', 'some-password', {} as ClientInfo);
-            console.log(result);
             expect(result).toBeDefined();
         });
     });

@@ -4,7 +4,6 @@ import supertest from 'supertest';
 import { User, UserModel } from '../../models/user';
 import authRouter from '../../routes/auth';
 import { hashPassword } from '../../helpers/hash.helper';
-import { createToken } from '../../controllers/auth.controller';
 
 describe('routes/auth', () => {
     let app: Application;
@@ -41,7 +40,10 @@ describe('routes/auth', () => {
             };
 
             // mock UserModel methods
-            jest.spyOn(UserModel, 'getByEmail').mockImplementation((email) => Promise.resolve(email === user.email ? { ...user, toJSON: () => user } : undefined) as never)
+            jest.spyOn(UserModel, 'getByEmail')
+                .mockImplementation((email) => Promise.resolve(
+                    email === user.email ? new UserModel(user) : undefined
+                ) as never)
         })
 
         it('should fail if email and password not provided', async () => {
@@ -75,7 +77,18 @@ describe('routes/auth', () => {
             });
 
             expect(res.statusCode).toBe(200);
-            expect(res.text).toEqual(JSON.stringify({ Token: createToken(user) }))
+
+            const parsedUser = JSON.parse(
+                Buffer.from(
+                    JSON.parse(res.text).Token.split('.')[1], 
+                    'base64'
+                ).toString()
+            );
+
+            expect(parsedUser.email).toEqual(user.email);
+            expect(parsedUser.name).toEqual(user.name);
+            expect(parsedUser.password).toEqual(user.password);
+            expect(parsedUser.role).toEqual(user.role);
         });
     });
 
