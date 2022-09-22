@@ -18,6 +18,7 @@ describe('routes/auth', () => {
         app = express();
 
         app.use(express.urlencoded({ extended: true }));
+        app.use(express.json());
         authRouter(app);
 
         request = supertest(app);
@@ -44,7 +45,7 @@ describe('routes/auth', () => {
             jest.spyOn(UserModel, 'checkCredentials')
                 .mockImplementation((e, p) => Promise.resolve(
                     e === email && p === password 
-                        ? { email, password, role: 1 } 
+                        ? new UserModel(user) 
                         : false
                 ) as never)
         });
@@ -81,10 +82,10 @@ describe('routes/auth', () => {
 
             expect(res.statusCode).toBe(200);
 
-            const parsedUser = jwt.decode(JSON.parse(res.text).token);
+            const decodedToken = jwt.decode(JSON.parse(res.text).token);
             
-            expect(parsedUser['email']).toEqual(user.email);
-            expect(parsedUser['role']).toEqual(user.role);
+            expect(decodedToken['email']).toEqual(user.email);
+            expect(decodedToken['role']).toEqual(user.role);
         });
     });
 
@@ -138,6 +139,44 @@ describe('routes/auth', () => {
             const res = await request.post(endpoint).type('form').send(user);
 
             expect(res.statusCode).toBe(201);
+        });
+    });
+
+    describe('refresh-token', () => {
+        const endpoint = '/api/refresh-token';
+        let token: string;
+
+        beforeEach(async () => {
+            jest.spyOn(UserModel, 'getByEmail')
+                .mockImplementation((e) => Promise.resolve(
+                    e === email 
+                        ? new UserModel(user) 
+                        : false
+                ) as never);
+
+            const res = await request.post('/api/login').type('form').send({
+                email,
+                password
+            });
+
+            expect(res.statusCode).toBe(200);
+
+            token = JSON.parse(res.text).token;
+        });
+
+        it('should succeed if token provided', async () => {
+            const res = await request.post(endpoint).send({
+                token
+            });
+
+            expect(res.statusCode).toBe(200);
+
+            const response = JSON.parse(res.text);
+            const decodedToken = jwt.decode(response.token);
+            
+            expect(response.userId).toBeDefined();
+            expect(decodedToken['email']).toEqual(user.email);
+            expect(decodedToken['role']).toEqual(user.role);
         });
     });
 
