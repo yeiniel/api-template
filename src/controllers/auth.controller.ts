@@ -23,7 +23,7 @@ export const login: Handler = async (req, res, next) => {
 
     if(user) {
       return res.json({ 
-        token: createToken({ email, role: user.role }) 
+        token: createToken(user) 
       });
     } else {
       throw createError(
@@ -43,7 +43,7 @@ export const refreshToken = async (refreshToken: string) => {
 
   return { 
     userId: user._id,
-    token: createToken({ email: user.email, role: user.role }) 
+    token: createToken(user) 
   }
 };
 
