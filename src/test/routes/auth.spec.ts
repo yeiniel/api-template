@@ -84,7 +84,7 @@ describe('routes/auth', () => {
 
             const decodedToken = jwt.decode(JSON.parse(res.text).token);
             
-            expect(decodedToken['email']).toEqual(user.email);
+            expect(decodedToken['sub']).toEqual(user.email);
             expect(decodedToken['role']).toEqual(user.role);
         });
     });
@@ -175,7 +175,7 @@ describe('routes/auth', () => {
             const decodedToken = jwt.decode(response.token);
             
             expect(response.userId).toBeDefined();
-            expect(decodedToken['email']).toEqual(user.email);
+            expect(decodedToken['sub']).toEqual(user.email);
             expect(decodedToken['role']).toEqual(user.role);
         });
     });

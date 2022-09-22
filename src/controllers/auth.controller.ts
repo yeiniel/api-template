@@ -7,8 +7,8 @@ import { addMinutes } from 'date-fns';
 import { User, UserModel } from '../models/user';
 import { ClientInfo, RefreshTokenModel } from '../models/refresh-token';
 
-export const createToken = (user: Pick<User, 'email' | 'role'>) => {
-  return jwt.sign(user, process.env['JWT_SECRET'], {
+const createToken = (user: Pick<User, 'email' | 'role'>) => {
+  return jwt.sign({ sub: user.email, role: user.role }, process.env['JWT_SECRET'], {
     expiresIn: process.env['TOKEN_EXPIRES_IN'],
   });
 };
@@ -40,7 +40,7 @@ export const refreshToken = async (refreshToken: string) => {
  // Your solution here
   const decodedToken = jwt.decode(refreshToken);
 
-  const user = await UserModel.getByEmail(decodedToken['email']);
+  const user = await UserModel.getByEmail(decodedToken['sub']);
 
   return { 
     userId: user._id,
