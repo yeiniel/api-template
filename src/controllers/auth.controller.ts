@@ -6,25 +6,20 @@ import jwt from 'jsonwebtoken';
 import uuid from 'uuid';
 import { addMinutes } from 'date-fns';
 
-export const createToken = (user: Omit<User, 'checkPassword'>) => {
+export const createToken = (user: Pick<User, 'email' | 'role'>) => {
   return jwt.sign(user, process.env['JWT_SECRET'], {
     expiresIn: process.env['TOKEN_EXPIRES_IN'],
   });
 };
 
 export const login = async (
-  email: string,
-  password: string,
+  email: User['email'],
+  password: User['password'],
   clientInfo: ClientInfo
 ) => {
- // Your solution here
-  const user = await UserModel.getByEmail(email);
+  const user = await UserModel.checkCredentials(email, password);
 
-  if (!user) { return false; }
-
-  if (!user.checkPassword(password)) { return false; }
-
-  return { Token: createToken(user.toJSON()) };
+  return user ? { Token: createToken({ email, role: user.role }) } : false;
 };
 
 export const refreshToken = async (refreshToken: string) => {
