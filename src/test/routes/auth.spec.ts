@@ -1,5 +1,6 @@
 import express, { Application } from 'express';
 import supertest from 'supertest';
+import jwt from 'jsonwebtoken';
 
 import { User, UserModel } from '../../models/user';
 import authRouter from '../../routes/auth';
@@ -79,15 +80,10 @@ describe('routes/auth', () => {
 
             expect(res.statusCode).toBe(200);
 
-            const parsedUser = JSON.parse(
-                Buffer.from(
-                    JSON.parse(res.text).Token.split('.')[1], 
-                    'base64'
-                ).toString()
-            );
-
-            expect(parsedUser.email).toEqual(user.email);
-            expect(parsedUser.role).toEqual(user.role);
+            const parsedUser = jwt.decode(JSON.parse(res.text).Token);
+            
+            expect(parsedUser['email']).toEqual(user.email);
+            expect(parsedUser['role']).toEqual(user.role);
         });
     });
 
