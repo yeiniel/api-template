@@ -1,4 +1,4 @@
-import { Request, Router, Response, NextFunction } from 'express';
+import { Application, Request, Router, Response, NextFunction } from 'express';
 import { UserAwareRequest } from '../lib/authentication';
 import {
   addUser,
@@ -10,7 +10,7 @@ import {
 import { highestRoleAllowed } from '../lib/authorization';
 import { emailFromDecodedToken } from '../helpers/token.helpers';
 
-export default (app: any) => {
+export default (app: Application) => {
   const router = Router();
 
   // Mount route as "/api/app/authenticated"
