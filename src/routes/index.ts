@@ -21,13 +21,13 @@ export default (app: any) => {
   refreshTokens(app);
 
   // catch 404 and forward to error handler
-  app.use('/', (req: Request, res: Response, next: NextFunction) => {
+  app.use((req: Request, res: Response, next: NextFunction) => {
     const err: any = new Error(`The requested resource could not be found: ${req.path}`);
     err.status = 404;
     next(err);
   });
 
-  app.use('/', (error: any, req: Request, res: Response, next: NextFunction) => {
+  app.use((error: any, req: Request, res: Response, next: NextFunction) => {
     let code = parseInt(error.code || error.status, 10) || 500;
     if (code < 100 || code > 600) {
       code = 500;

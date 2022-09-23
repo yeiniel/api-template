@@ -1,130 +1,24 @@
-import { Handler } from 'express';
 import createError from 'http-errors';
-import jwt from 'jsonwebtoken';
 import uuid from 'uuid';
 import { addMinutes } from 'date-fns';
 
-import { User, UserModel } from '../models/user';
 import { ClientInfo, RefreshTokenModel } from '../models/refresh-token';
+import { UserModel } from '../models/user';
 
-const createToken = (user: Pick<User, 'email' | 'role'>) => {
-  return jwt.sign({ sub: user.email, role: user.role }, process.env['JWT_SECRET'], {
-    expiresIn: process.env['TOKEN_EXPIRES_IN'],
-  });
-};
-
-export const login: Handler = async (req, res, next) => {
+export const forgotPassword = async (email: string) => {
   try {
-    const { email, password, client } = req.body;
-
-    // TODO: validate input
-
-    const user = await UserModel.checkCredentials(email, password);
-
-    if(user) {
-      return res.json({ 
-        token: createToken(user) 
-      });
-    } else {
-      throw createError(
-        401, 
-        'The username or password is wrong please check and try again'
-      );
-    }
-  } catch (error) {
-    next(error);
-  }
-}
-
-export const refreshToken: Handler = async (req, res, next) => {
-  try {
-    const { token } = req.body;
-    
-    const decodedToken = jwt.verify(token, process.env['JWT_SECRET']);
-
-    const user = await UserModel.getByEmail(decodedToken['sub']);
-
-    return res.json({ 
-      userId: user._id,
-      token: createToken(user) 
-    });
-  } catch (error) {
-    next(createError(
-      401, 
-      'Wrong refresh token'
-    ));
-  }
-};
-
-export const validateToken: Handler = async (req, res, next) => {
-  try {
-    const { token } = req.body;
-    
-    const decodedToken = jwt.verify(token, process.env['JWT_SECRET']);
-
-    const user = await UserModel.getByEmail(decodedToken['sub']);
-
-    return res.json({ 
-      userId: user._id,
-      token
-    });
-  } catch (error) {
-    next(createError(
-      401, 
-      'Wrong refresh token'
-    ));
-  }
-};
-
-export const register: Handler = async (req, res, next) => {
-  try {
-    const newUser = req.body;
-
-    if (newUser.role && typeof newUser.role === 'string') {
-      newUser.role = parseInt(newUser.role);
-    }
-
-    if (newUser.dob && typeof newUser.dob === 'string') {
-      newUser.dob = parseInt(newUser.dob);
-    }
-
     try {
-      await UserModel.validateAndCreate(newUser);
-
-      return res.status(201)
-        .json({ success: true });
+      await (new UserModel).updateUserById(email, {
+        passwordResetTokenExpires: addMinutes(new Date(), 10),
+        passwordResetToken: uuid.v4()
+      })
     } catch (error) {
-      // handle the special case of an already existing user
-      if (error.code === 11000) {
-        throw createError(
-          403, 
-          'User already exists'
-        );
+      if (error.message === 'Not Found') {
+        throw createError(403, 'There was a problem. User does not exist');
       } else {
         throw error;
       }
     }
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const forgotPassword = async (email: string) => {
-  try {
-    const existingUser = await UserModel.getByEmail(email);
-    if (!existingUser) {
-      throw createError(403, 'There was a problem. User does not exist');
-    }
-    const now = new Date();
-    const passwordResetTokenExpires = addMinutes(now, 10);
-    const passwordResetToken = uuid.v4();
-    await existingUser.updateOne({
-      passwordResetTokenExpires,
-      passwordResetToken,
-      updatedAt: now,
-    });
-    console.log('reset token:', passwordResetToken);
-    console.log('reset token:', email);
 
     return { success: true };
   } catch (error) {
@@ -134,7 +28,7 @@ export const forgotPassword = async (email: string) => {
 
 export const resetPassword = async (email: string, password: string, token: string) => {
   try {
-    const user = await UserModel.getByEmail(email, false);
+    const user = await (new UserModel()).getUserByEmail(email);
     if (!user) {
       throw createError(403, 'There was a problem reseting your password. User does not exist');
     }
@@ -144,7 +38,7 @@ export const resetPassword = async (email: string, password: string, token: stri
     if (user.passwordResetTokenExpires < new Date()) {
       throw createError(403, 'There was a problem reseting your password. Token expired');
     }
-    await user.updateOne({ password });
+    await (new UserModel()).updateUserById(email, { password });
     return { success: true };
   } catch (error) {
     throw error;
