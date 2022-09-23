@@ -34,9 +34,6 @@ export class User implements IUser {
   @prop({ required: true })
   password!: string;
 
-  @prop({ default: 0 })
-  failedLoginAttempts?: number;
-
   @prop()
   passwordResetToken?: string;
 
