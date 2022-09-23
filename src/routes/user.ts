@@ -1,4 +1,5 @@
 import { Request, Router, Response, NextFunction } from 'express';
+import { UserAwareRequest } from '../lib/authentication';
 import {
   addUser,
   deleteUser,
@@ -6,6 +7,7 @@ import {
   getUsers,
   updateUserController,
 } from '../controllers/user.controller';
+import { highestRoleAllowed } from '../lib/authorization';
 
 export default (app: any) => {
   const router = Router();
@@ -13,10 +15,10 @@ export default (app: any) => {
   // Mount route as "/api/app/authenticated"
   app.use('/api/authenticated', router);
 
-  router.get('/profile', async (req: Request, res: Response, next: NextFunction) => {
+  router.get('/profile', highestRoleAllowed(1), async (req: UserAwareRequest, res: Response, next: NextFunction) => {
     try {
       const loggedInUser: any = Object.assign({}, req.user); // temp fix for typescript error
-      const user: any = await getUser(loggedInUser.id, req.user);
+      const user: any = await getUser(loggedInUser.sub, req.user);
       if (user) {
         return res.json(user);
       }
@@ -62,7 +64,7 @@ export default (app: any) => {
     }
   });
 
-  router.get('/users/:userId', async (req: Request, res: Response, next: NextFunction) => {
+  router.get('/users/:userId', async (req: UserAwareRequest, res: Response, next: NextFunction) => {
     try {
       const { userId } = req.params;
       const user: any = await getUser(userId, req.user);

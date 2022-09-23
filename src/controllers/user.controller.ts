@@ -3,7 +3,8 @@ import { hashPassword } from '../helpers/hash.helper';
 import { Role } from '../models/role';
 import { IPatch } from '../models/ipatch';
 
-import { UserModel } from '../models/user';
+import { User, UserModel } from '../models/user';
+import { DecodedToken, emailFromDecodedToken } from '../helpers/token.helpers';
 
 const changePassword = (attr: IPatch) => {
   if (attr.path === '/password') {
@@ -58,12 +59,12 @@ export const getUsers = async (user: any, page: number, limit: number, query?: a
   }
 };
 
-export const getUser = async (userId: string, user: any) => {
-  if (userId !== user.id && !user.roles.includes(Role.Admin)) {
+export const getUser = async (email: User['email'], decodedToken: DecodedToken) => {
+  if (email !== emailFromDecodedToken(decodedToken)) {
     throw createError(403, 'You are not authorized to access');
   }
   try {
-    const user = await (new UserModel()).getUserById(userId);
+    const user = await (new UserModel()).getUserByEmail(email);
     return user;
   } catch (error) {
     throw error;
