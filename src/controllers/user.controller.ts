@@ -14,9 +14,6 @@ const changePassword = (attr: IPatch) => {
 };
 
 export const addUser = async (newUser: any, user: any) => {
-  if (!user.roles.includes(Role.Admin)) {
-    throw createError(403, 'You are not authorized to access');
-  }
   try {
     const existingUser = await (new UserModel()).getUserByEmail(newUser.email);
     if (existingUser) {
@@ -38,9 +35,6 @@ export const addUser = async (newUser: any, user: any) => {
 };
 
 export const getUsers = async (user: any, page: number, limit: number, query?: any) => {
-  if (!user.roles.includes(Role.Admin)) {
-    throw createError(403, 'You are not authorized to access');
-  }
   try {
     const parsedFilter = {};
     if (query.filter) {
@@ -72,7 +66,7 @@ export const getUser = async (email: User['email'], decodedToken: DecodedToken) 
 };
 
 export const updateUserController = async (userId: string, payload: any, user: any) => {
-  if (userId !== user.id && !user.roles.includes(Role.Admin)) {
+  if (userId !== user.id) {
     throw createError(403, `You are not authorized to edit the user ${userId}`);
   }
   try {
@@ -91,9 +85,6 @@ export const updateUserController = async (userId: string, payload: any, user: a
 };
 
 export const deleteUser = async (userId: string, user: any) => {
-  if (!user.roles.includes(Role.Admin)) {
-    throw createError(403, `You are not authorized to delete the user ${userId}`);
-  }
   try {
     const response = await (new UserModel()).deleteUserById(userId);
     return response;

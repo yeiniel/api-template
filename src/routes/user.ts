@@ -31,7 +31,7 @@ export default (app: any) => {
     }
   });
 
-  router.get('/users', async (req: Request, res: Response, next: NextFunction) => {
+  router.get('/users', highestRoleAllowed(1), async (req: Request, res: Response, next: NextFunction) => {
     try {
       const users: any = await getUsers(
         req.user,
@@ -52,7 +52,7 @@ export default (app: any) => {
     }
   });
 
-  router.post('/users', async (req: Request, res: Response, next: NextFunction) => {
+  router.post('/users', highestRoleAllowed(1), async (req: Request, res: Response, next: NextFunction) => {
     try {
       const response: any = await addUser(req.body, req.user);
       if (response && response.exists) {
@@ -67,7 +67,7 @@ export default (app: any) => {
     }
   });
 
-  router.get('/users/:userId', async (req: UserAwareRequest, res: Response, next: NextFunction) => {
+  router.get('/users/:userId', highestRoleAllowed(1), async (req: UserAwareRequest, res: Response, next: NextFunction) => {
     try {
       const { userId } = req.params;
       const user: any = await getUser(userId, req.user);
@@ -80,7 +80,7 @@ export default (app: any) => {
     }
   });
 
-  router.patch('/users/:userId', async (req: Request, res: Response, next: NextFunction) => {
+  router.patch('/users/:userId', highestRoleAllowed(1), async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { userId } = req.params;
       const user: any = await updateUserController(userId, req.body, req.user);
@@ -93,7 +93,7 @@ export default (app: any) => {
     }
   });
 
-  router.delete('/users/:userId', async (req: Request, res: Response, next: NextFunction) => {
+  router.delete('/users/:userId', highestRoleAllowed(1), async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { userId } = req.params;
       const user: any = await deleteUser(userId, req.user);
