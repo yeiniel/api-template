@@ -1,7 +1,8 @@
 import passport from 'passport';
 import { Strategy as JWTStrategy, ExtractJwt } from 'passport-jwt';
-import { User } from '../models/user';
 import { Request } from 'express';
+
+import { DecodedToken } from '../helpers/token.helpers';
 
 // const FacebookStrategy = passportFacebook.Strategy;
 
@@ -115,5 +116,5 @@ passport.use(jwtStrategy);
  * An express HTTP request that contain user information.
  */
 export interface UserAwareRequest extends Request {
-  user?: User;
+  user?: DecodedToken;
 }

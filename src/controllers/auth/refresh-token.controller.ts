@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import createError from 'http-errors';
 import jwt from 'jsonwebtoken';
 
-import { createToken } from '../../helpers/token.helpers';
+import { createToken, DecodedToken, emailFromDecodedToken } from '../../helpers/token.helpers';
 import { BaseAuthController } from './base-auth.controller';
 
 export class RefreshTokenController extends BaseAuthController {
@@ -10,9 +10,13 @@ export class RefreshTokenController extends BaseAuthController {
         try {
           const { token } = req.body;
           
-          const decodedToken = jwt.verify(token, process.env['JWT_SECRET']);
+          const decodedToken = jwt.verify(
+            token, process.env['JWT_SECRET']
+          ) as DecodedToken;
       
-          const user = await this.userModel.getUserByEmail(decodedToken['sub']);
+          const user = await this.userModel.getUserByEmail(
+            emailFromDecodedToken(decodedToken)
+          );
       
           return res.json({ 
             userId: user.email,
