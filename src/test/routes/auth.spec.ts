@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 import authRouter from '../../routes/auth';
 import { comparePasswords, hashPassword } from '../../helpers/hash.helper';
 import { UserModel, User } from '../../models/user';
+import { MaxRetries } from '../../models/max-retries';
 
 describe('routes/auth', () => {
     let app: Application;
@@ -12,8 +13,13 @@ describe('routes/auth', () => {
     let email: User['email'];
     let password: User['password'];
     let user: User;
+    let maxRetries;
     
     beforeEach(() => {
+        maxRetries = {
+            failedLoginAttempts: 0
+        }
+
         // setup express application instance
         app = express();
 
@@ -21,27 +27,41 @@ describe('routes/auth', () => {
         app.use(express.json());
 
         // inject mocked dependencies
-        app.set('userModel', new UserModel(undefined, {
-            create: jest.fn((e) => Promise.resolve({
-                 ...e, 
-                 toJSON: () => e 
-            })),
-            findOne: jest.fn((e) => 
-                Promise.resolve(e.email === user.email 
-                    ? {
-                        ...user,
-                        toJSON: () => user,
-                        checkPassword: (p) => comparePasswords(p, user.password),
-                        updateOne: (changes) => {
-                            user = { ...user, ...changes };
+        app.set('userModel', new UserModel(
+            undefined, 
+            {
+                create: jest.fn((e) => Promise.resolve({
+                    ...e, 
+                    toJSON: () => e 
+                })),
+                findOne: jest.fn((e) => 
+                    Promise.resolve(e.email === user.email 
+                        ? {
+                            ...user,
+                            toJSON: () => user,
+                            checkPassword: (p) => comparePasswords(p, user.password),
+                            updateOne: (changes) => {
+                                user = { ...user, ...changes };
 
-                            return Promise.resolve()
+                                return Promise.resolve()
+                            }
                         }
-                     }
-                    : undefined
-                )
-            ),
-        } as never));
+                        : undefined
+                    )
+                ),
+            } as never,
+            new MaxRetries({
+                findById: () => Promise.resolve(maxRetries),
+                create: (e) => { 
+                    maxRetries = e; 
+                    return Promise.resolve(); 
+                },
+                updateOne: (q, changes) => { 
+                    maxRetries.failedLoginAttempts = changes.failedLoginAttempts;  
+                    return Promise.resolve();
+                }
+            } as never)
+        ));
         
         authRouter(app);
 

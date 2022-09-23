@@ -1,6 +1,8 @@
 import { Validator } from 'jsonschema';
 import { FilterQuery } from 'mongoose';
 
+import { AccountLockingStrategy } from '../account-locking-strategy';
+import { MaxRetries } from '../max-retries';
 import { User } from "./user";
 import { UserJSONSchema } from './user.json-schema';
 import { UserTypegooseModel } from './user.typegoose-model';
@@ -12,12 +14,16 @@ export class UserModel {
 
     protected validator: Validator;
     protected typegooseModel: typeof UserTypegooseModel;
+    protected accountLockingStrategy: AccountLockingStrategy;
 
-    protected maxFailedLoginAttempts = 3;
-
-    constructor(validator?: Validator, typegooseModel?: typeof UserTypegooseModel){
+    constructor(
+        validator?: Validator, 
+        typegooseModel?: typeof UserTypegooseModel, 
+        accountLockingStrategy?: AccountLockingStrategy
+    ){
         this.validator = validator ?? new Validator();
         this.typegooseModel = typegooseModel ?? UserTypegooseModel;
+        this.accountLockingStrategy = accountLockingStrategy ?? new MaxRetries();
     }
 
     getUsers(page: number, limit: number, parsedFilter: FilterQuery<typeof UserTypegooseModel>) {
@@ -55,10 +61,11 @@ export class UserModel {
             throw new Error('Not Found');
         }
 
-        return await user.updateOne({ 
-            ...changes, 
-            ...(changes.password ? { failedLoginAttempts: 0 } : {}) 
-        });
+        if (changes.password) {
+            await this.accountLockingStrategy.passwordCheck(id, true);
+        }
+
+        return await user.updateOne(changes);
     }
 
     deleteUserById(id: string) {
@@ -70,15 +77,15 @@ export class UserModel {
 
         if (!user) { throw new Error('Not Found'); }
 
-        if (user.failedLoginAttempts >= this.maxFailedLoginAttempts) {
+        if (await this.accountLockingStrategy.isLocked(user._id)) {
             throw new Error('Account locked');
         }
 
-        if (!user.checkPassword(password)) {
-            await user.updateOne({
-                failedLoginAttempts: user.failedLoginAttempts + 1
-            });
+        const passwordValid = user.checkPassword(password);
 
+        await this.accountLockingStrategy.passwordCheck(user._id, passwordValid);
+
+        if (!passwordValid) {
             throw new Error('Wrong Password');
         }
 
