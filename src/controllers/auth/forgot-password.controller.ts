@@ -1,22 +1,11 @@
-import { Request, Response, NextFunction, IRoute } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import createError from 'http-errors';
 import { addMinutes } from 'date-fns';
 import uuid from 'uuid';
 
-import { UserModel } from '../../models/user';
-import { AbstractController } from '../abstract.controller';
+import { BaseAuthController } from './base-auth.controller';
 
-export class ForgotPasswordController implements AbstractController {
-    protected userModel: UserModel;
-
-    constructor(userModel?: UserModel) {
-        this.userModel = userModel ?? new UserModel();
-    }
-
-    setupRoute(route: IRoute) {
-        route.post(this.post.bind(this));
-    }
-
+export class ForgotPasswordController extends BaseAuthController {
     protected async post(req: Request, res: Response, next: NextFunction) {
         try {
           const { email } = req.body;
