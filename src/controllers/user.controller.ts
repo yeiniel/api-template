@@ -1,8 +1,9 @@
-import { UserModel } from '../models/user';
 import createError from 'http-errors';
 import { hashPassword } from '../helpers/hash.helper';
 import { Role } from '../models/role';
 import { IPatch } from '../models/ipatch';
+
+import { UserModel } from '../models/user';
 
 const changePassword = (attr: IPatch) => {
   if (attr.path === '/password') {
@@ -16,7 +17,7 @@ export const addUser = async (newUser: any, user: any) => {
     throw createError(403, 'You are not authorized to access');
   }
   try {
-    const existingUser = await UserModel.getByEmail(newUser.email, false);
+    const existingUser = await (new UserModel()).getUserByEmail(newUser.email);
     if (existingUser) {
       return {
         exists: true,
@@ -25,7 +26,7 @@ export const addUser = async (newUser: any, user: any) => {
     if (!newUser.name) {
       newUser.name = `${newUser.firstName} ${newUser.lastName}`;
     }
-    const createdUser = await UserModel.validateAndCreate(newUser);
+    const createdUser = await new UserModel().createUser(newUser);
     if (!createdUser) {
       return null;
     }
@@ -50,7 +51,7 @@ export const getUsers = async (user: any, page: number, limit: number, query?: a
         }
       });
     }
-    const users = await UserModel.getUsers(page, limit, parsedFilter);
+    const users = await (new UserModel()).getUsers(page, limit, parsedFilter);
     return users;
   } catch (error) {
     throw error;
@@ -62,8 +63,8 @@ export const getUser = async (userId: string, user: any) => {
     throw createError(403, 'You are not authorized to access');
   }
   try {
-    const users = await UserModel.getById(userId, true);
-    return users;
+    const user = await (new UserModel()).getUserById(userId);
+    return user;
   } catch (error) {
     throw error;
   }
@@ -78,7 +79,7 @@ export const updateUserController = async (userId: string, payload: any, user: a
       const hashPass = hashPassword(payload['password']);
       payload['password'] = hashPass;
     }
-    const response = await UserModel.updateUser(userId, payload);
+    const response = await (new UserModel()).updateUserById(userId, payload);
     if (!response) {
       return null;
     }
@@ -93,7 +94,7 @@ export const deleteUser = async (userId: string, user: any) => {
     throw createError(403, `You are not authorized to delete the user ${userId}`);
   }
   try {
-    const response = await UserModel.deleteById(userId);
+    const response = await (new UserModel()).deleteUserById(userId);
     return response;
   } catch (error) {
     throw error;
@@ -106,7 +107,7 @@ export const getAllUsers = async (userId: string, user: any) => {
     throw createError(403, 'You are not authorized to access');
   }
   try {
-    const response = await UserModel.getUsers;
+    const response = await (new UserModel()).getUsers;
     return response;
   } catch (error) {
     throw error;
@@ -118,7 +119,7 @@ export const getUserByEmail = async (userId: string, user: any, email: string) =
   if (userId !== user.id && !user.roles.includes(Role.Admin)) {
     throw createError(403, 'You are not authorized to access');
   }
-  const existingUser = await UserModel.getByEmail(email, false);
+  const existingUser = await (new UserModel()).getUserByEmail(email);
   if (existingUser) {
     return {
       existingUser,
@@ -128,7 +129,7 @@ export const getUserByEmail = async (userId: string, user: any, email: string) =
 
 export const getUserById = async (userId: string, user: any, id: string) => {
   // get all members from user collection
-  const existingUser = await UserModel.getById(id, false);
+  const existingUser = await (new UserModel()).getUserById(id);
   if (existingUser) {
     return {
       existingUser,

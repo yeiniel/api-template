@@ -3,9 +3,6 @@ const awsServerlessExpress = require(process.env.NODE_ENV === 'test'
   ? '../../index'
   : 'aws-serverless-express');
 import app from './app';
-import MongoService from './lib/mongodb';
-
-let conn = null;
 
 // NOTE: If you get ERR_CONTENT_DECODING_FAILED in your browser, this is likely
 // due to a compressed response (e.g. gzip) which has not been handled correctly
@@ -39,10 +36,5 @@ export const handler = (event: APIGatewayEvent, context: Context) => {
   // function calls thanks to `callbackWaitsForEmptyEventLoop`.
   // This means your Lambda function doesn't have to go through the
   // potentially expensive process of connecting to Redis every time.
-  if (!conn) {
-    MongoService.getConnection().then((connection) => {
-      conn = connection;
-      awsServerlessExpress.proxy(server, event, context);
-    });
-  }
+  awsServerlessExpress.proxy(server, event, context);
 };

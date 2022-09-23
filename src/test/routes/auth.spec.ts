@@ -2,23 +2,42 @@ import express, { Application } from 'express';
 import supertest from 'supertest';
 import jwt from 'jsonwebtoken';
 
-import { User, UserModel } from '../../models/user';
 import authRouter from '../../routes/auth';
-import { hashPassword } from '../../helpers/hash.helper';
+import { comparePasswords, hashPassword } from '../../helpers/hash.helper';
+import { UserModel, User } from '../../models/user';
 
 describe('routes/auth', () => {
     let app: Application;
     let request: ReturnType<supertest>;
     let email: User['email'];
     let password: User['password'];
-    let user: Omit<User, 'checkPassword'>;
-
+    let user: User;
+    
     beforeEach(() => {
         // setup express application instance
         app = express();
 
         app.use(express.urlencoded({ extended: true }));
         app.use(express.json());
+
+        // inject mocked dependencies
+        app.set('userModel', new UserModel(undefined, {
+            create: jest.fn((e) => Promise.resolve({
+                 ...e, 
+                 toJSON: () => e 
+            })),
+            findOne: jest.fn((e) => 
+                Promise.resolve(e.email === user.email 
+                    ? {
+                        ...user,
+                        toJSON: () => user,
+                        checkPassword: (p) => comparePasswords(p, user.password)
+                     }
+                    : undefined
+                )
+            ),
+        } as never));
+        
         authRouter(app);
 
         request = supertest(app);
@@ -36,15 +55,6 @@ describe('routes/auth', () => {
             role: 1,
             password: hashPassword(password)
         };
-    });
-
-    beforeEach(async () => {
-        jest.spyOn(UserModel, 'checkCredentials')
-            .mockImplementation((e, p) => Promise.resolve(
-                e === email && p === password 
-                    ? new UserModel(user) 
-                    : false
-            ) as never)
     });
 
     describe('login', () => {
@@ -118,11 +128,6 @@ describe('routes/auth', () => {
     describe('register', () => {
         const endpoint = '/api/register';
 
-        beforeEach(async () => {
-            jest.spyOn(UserModel, 'create')
-                .mockImplementation(() => Promise.resolve() as never)
-        });
-
         it('should fail if email, name, role and password not provided', async () => {
             const res = await request.post(endpoint);
 
@@ -173,13 +178,6 @@ describe('routes/auth', () => {
         let token: string;
 
         beforeEach(async () => {
-            jest.spyOn(UserModel, 'getByEmail')
-                .mockImplementation((e) => Promise.resolve(
-                    e === email 
-                        ? new UserModel(user) 
-                        : false
-                ) as never);
-
             const res = await request.post('/api/login').type('form').send({
                 email,
                 password
