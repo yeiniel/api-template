@@ -18,20 +18,23 @@ export class RegisterController extends BaseAuthController {
       
           try {
             await this.userModel.createUser(newUser);
-      
-            return res.status(201)
-              .json({ success: true });
           } catch (error) {
-            // handle the special case of an already existing user
-            if (error.code === 11000) {
-              throw createError(
-                403, 
-                'User already exists'
-              );
-            } else {
-              throw error;
+            switch(error.code) {
+              // handle the special case of an already existing user
+              case 11000:
+                throw createError(
+                  403, 
+                  'User already exists'
+                );
+                break;
+              default:
+                throw error;
+                break;
             }
           }
+    
+          return res.status(201)
+            .json({ success: true });
         } catch (error) {
           next(error);
         }
