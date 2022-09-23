@@ -8,7 +8,7 @@ import {
   updateUserController,
 } from '../controllers/user.controller';
 import { highestRoleAllowed } from '../lib/authorization';
-import { emailFromDecodedToken } from 'helpers/token.helpers';
+import { emailFromDecodedToken } from '../helpers/token.helpers';
 
 export default (app: any) => {
   const router = Router();
