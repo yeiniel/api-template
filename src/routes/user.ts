@@ -8,6 +8,7 @@ import {
   updateUserController,
 } from '../controllers/user.controller';
 import { highestRoleAllowed } from '../lib/authorization';
+import { emailFromDecodedToken } from 'helpers/token.helpers';
 
 export default (app: any) => {
   const router = Router();
@@ -18,7 +19,9 @@ export default (app: any) => {
   router.get('/profile', highestRoleAllowed(1), async (req: UserAwareRequest, res: Response, next: NextFunction) => {
     try {
       const loggedInUser: any = Object.assign({}, req.user); // temp fix for typescript error
-      const user: any = await getUser(loggedInUser.sub, req.user);
+      const user: any = await getUser(
+        emailFromDecodedToken(req.user), req.user
+      );
       if (user) {
         return res.json(user);
       }
