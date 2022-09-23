@@ -13,6 +13,8 @@ export class UserModel {
     protected validator: Validator;
     protected typegooseModel: typeof UserTypegooseModel;
 
+    protected maxFailedLoginAttempts = 3;
+
     constructor(validator?: Validator, typegooseModel?: typeof UserTypegooseModel){
         this.validator = validator ?? new Validator();
         this.typegooseModel = typegooseModel ?? UserTypegooseModel;
@@ -53,17 +55,33 @@ export class UserModel {
             throw new Error('Not Found');
         }
 
-        return await user.updateOne(changes);
+        return await user.updateOne({ 
+            ...changes, 
+            ...(changes.password ? { failedLoginAttempts: 0 } : {}) 
+        });
     }
 
     deleteUserById(id: string) {
         return this.typegooseModel.deleteOne({ _id: id })
     }
 
-    /** Check whether or not credentials match those of a registered user */
-    async checkCredentials(email: User['email'], password: User['password']) {
+    async login(email: User['email'], password: User['password']) {
         const user = await this.typegooseModel.findOne({ email });
 
-        return user && user.checkPassword(password) ? user.toJSON() : false;
+        if (!user) { throw new Error('Not Found'); }
+
+        if (user.failedLoginAttempts >= this.maxFailedLoginAttempts) {
+            throw new Error('Account locked');
+        }
+
+        if (!user.checkPassword(password)) {
+            await user.updateOne({
+                failedLoginAttempts: user.failedLoginAttempts + 1
+            });
+
+            throw new Error('Wrong Password');
+        }
+
+        return user.toJSON();
     }
 }

@@ -31,7 +31,12 @@ describe('routes/auth', () => {
                     ? {
                         ...user,
                         toJSON: () => user,
-                        checkPassword: (p) => comparePasswords(p, user.password)
+                        checkPassword: (p) => comparePasswords(p, user.password),
+                        updateOne: (changes) => {
+                            user = { ...user, ...changes };
+
+                            return Promise.resolve()
+                        }
                      }
                     : undefined
                 )
@@ -53,8 +58,9 @@ describe('routes/auth', () => {
             email,
             name: `Test User ${Math.random()}`,
             role: 1,
-            password: hashPassword(password)
-        };
+            password: hashPassword(password),
+            failedLoginAttempts: 0
+        } as never;
     });
 
     describe('login', () => {
