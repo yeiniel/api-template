@@ -8,17 +8,7 @@ import { User as IUser } from './user';
 
 // You User Model definition here
 @plugin(paginate)
-@pre<User>('save', async function() {
-    // end early if password is not modified
-    if (!this.isModified('password')) return;
-
-    // hash password
-    this.password = hashPassword(this.password);
-})
 export class User implements IUser {
-  @prop({ required: true })
-  _id?: string;
-
   @prop({ required: true, index: true, unique: true })
   email!: string;
 
@@ -31,7 +21,11 @@ export class User implements IUser {
   @prop({ required: true, enum: Role })
   role!: Role;
 
-  @prop({ required: true })
+  @prop({ 
+    required: true,
+    get: password => password, 
+    set: password => hashPassword(password) 
+  })
   password!: string;
 
   @prop()
