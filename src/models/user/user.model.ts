@@ -50,7 +50,7 @@ export class UserModel {
             .then(document => document.toJSON());
     }
 
-    async updateUserById(id: string, changes: Partial<Omit<User, 'email'>>) {
+    async updateUserById(id: string, changes: Partial<User>) {
         this.validator.validate(
             changes, PartialUserJSONSchema, { throwError: true }
         );
@@ -65,7 +65,22 @@ export class UserModel {
             await this.accountLockingStrategy.passwordCheck(id, true);
         }
 
-        return await user.updateOne(changes);
+        for (let key of Object.keys(changes)) {
+            console.log({key});
+            user[key] = changes[key];
+        }
+
+        return await user.save();
+    }
+
+    async updateUserByEmail(email: User['email'], changes: Partial<Omit<User, 'email'>>) {
+        const user = await this.typegooseModel.findOne({ email });
+
+        if (!user) {
+            throw new Error('Not Found');
+        }
+
+        return await this.updateUserById(user._id, changes);
     }
 
     deleteUserById(id: string) {
