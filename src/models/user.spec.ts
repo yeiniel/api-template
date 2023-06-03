@@ -23,12 +23,12 @@ describe('models/user', () => {
         beforeEach(() => user = new User());
 
         it('should provide passwordResetToken',
-           setAndGetUserAttrTestFactory('passwordResetToken',
-                                        () => `some-token-${Math.floor(Math.random() * 1000)}`));
+            setAndGetUserAttrTestFactory('passwordResetToken',
+                () => `some-token-${Math.floor(Math.random() * 1000)}`));
 
         it('should provide passwordResetTokenExpires',
-           setAndGetUserAttrTestFactory('passwordResetTokenExpires',
-                                        () => new Date()));
+            setAndGetUserAttrTestFactory('passwordResetTokenExpires',
+                () => new Date()));
     });
 
     describe(UserModel.name, () => {
@@ -59,15 +59,15 @@ describe('models/user', () => {
                 // then
                 expect(createSpy).toHaveBeenCalledWith(input);
                 expect(createSpy.mock.results[0].value).toEqual(response);
-            })
+            });
         });
 
         describe(UserModel.getUsers.name, () => {
-            it('should call paginate with input and return value', () => {
+            it('should call paginate with filter, {page, limit} and return value', () => {
                 // given
                 const page = 0;
                 const limit = Infinity;
-                const filter = {}
+                const filter = {};
                 const paginateSpy = jest.spyOn(UserModel, 'paginate').mockResolvedValue(undefined);
 
                 // when
@@ -76,13 +76,13 @@ describe('models/user', () => {
                 // then
                 expect(paginateSpy).toHaveBeenCalledWith(filter, { page, limit });
                 expect(paginateSpy.mock.results[0].value).toEqual(response);
-            })
+            });
         });
 
         describe(UserModel.getById.name, () => {
-            it('should call findById with input and return value', () => {
+            it('should call findById with userId and return value', () => {
                 // given
-                const userId = `some-id-${Math.floor(Math.random() * 1000)}`
+                const userId = `some-id-${Math.floor(Math.random() * 1000)}`;
                 const findByIdSpy = jest.spyOn(UserModel, 'findById').mockResolvedValue({} as never);
 
                 // when
@@ -105,7 +105,7 @@ describe('models/user', () => {
                 const result = UserModel.updateUser(userId, payload);
 
                 // then
-                expect(updateOneSpy).toHaveBeenCalledWith({ _id: userId}, payload);
+                expect(updateOneSpy).toHaveBeenCalledWith({ _id: userId }, payload);
                 expect(result).toBe(updateOneSpy.mock.results[0].value);
             });
         });
@@ -120,7 +120,7 @@ describe('models/user', () => {
                 const result = UserModel.deleteById(userId);
 
                 // then
-                expect(deleteOneSpy).toHaveBeenCalledWith({ _id: userId});
+                expect(deleteOneSpy).toHaveBeenCalledWith({ _id: userId });
                 expect(result).toBe(deleteOneSpy.mock.results[0].value);
             });
         });
