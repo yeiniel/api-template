@@ -1,6 +1,8 @@
 import { prop, getModelForClass, ReturnModelType, plugin, Ref } from '@typegoose/typegoose';
+import { FilterQuery, PaginateOptions, PaginateResult } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
 
+@plugin(paginate)
 export class User {
 
   @prop()
@@ -9,6 +11,17 @@ export class User {
   @prop()
   passwordResetTokenExpires?: Date;
   
+  static paginate: (
+    this: ReturnModelType<typeof User>,
+    query?: FilterQuery<ReturnModelType<typeof User>>,
+    options?: PaginateOptions,
+    callback?: (err: Error, result: PaginateResult<ReturnModelType<typeof User>>) => void,
+    ) => Promise<PaginateResult<ReturnModelType<typeof User>>>;
+
+  static getUsers(this: ReturnModelType<typeof User>, page: number, limit: number, parsedFilter: FilterQuery<ReturnModelType<typeof User>>) {
+    return this.paginate(parsedFilter, { page, limit });
+  }
+
   static async getByEmail(this: ReturnModelType<typeof User>, email: string, flag?: boolean) {
     return this.findOne({ email });
   }
