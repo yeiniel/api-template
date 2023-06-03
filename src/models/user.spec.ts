@@ -12,11 +12,13 @@ describe('models/user', () => {
 
     describe(UserModel.name, () => {
         describe(UserModel.getByEmail.name, () => {
-            it('should exist', () => {
+            it('should promise to return something', async () => {
                 // given
                 // when
+                const response = await UserModel.getByEmail();
+
                 // then
-                expect(User.getByEmail).toBeDefined();
+                expect(response).toBeDefined();
             });
         });
     });
