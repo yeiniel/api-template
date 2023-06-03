@@ -2,7 +2,9 @@ import { prop, getModelForClass, ReturnModelType, plugin, Ref } from '@typegoose
 import paginate from 'mongoose-paginate-v2';
 
 export class User {
-  static getByEmail(this: ReturnModelType<typeof User>) {}
+  static async getByEmail(this: ReturnModelType<typeof User>) {
+    return {};
+  }
 }
 
 const DefaultTransform = {
