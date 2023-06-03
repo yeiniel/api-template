@@ -18,6 +18,17 @@ describe('models/user', () => {
             // then
             expect(user.passwordResetToken).toBe(token);
         });
+
+        it('should provide passwordResetTokenExpires', () => {
+            // given
+            const tokenExpires = new Date();
+
+            // when
+            user.passwordResetTokenExpires = tokenExpires;
+
+            // then
+            expect(user.passwordResetTokenExpires).toBe(tokenExpires);
+        });
     });
 
     describe(UserModel.name, () => {
