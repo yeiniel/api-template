@@ -78,5 +78,20 @@ describe('models/user', () => {
                 expect(paginateSpy.mock.results[0].value).toEqual(response);
             })
         });
+
+        describe(UserModel.getById.name, () => {
+            it('should call findById with input and return value', () => {
+                // given
+                const userId = `some-id-${Math.floor(Math.random() * 1000)}`
+                const findByIdSpy = jest.spyOn(UserModel, 'findById').mockResolvedValue({} as never);
+
+                // when
+                const result = UserModel.getById(userId);
+
+                // then
+                expect(findByIdSpy).toHaveBeenCalledWith(userId);
+                expect(result).toBe(findByIdSpy.mock.results[0].value);
+            });
+        });
     });
 });
