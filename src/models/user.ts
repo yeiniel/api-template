@@ -33,6 +33,10 @@ export class User {
   static getById(this: ReturnModelType<typeof User>, id: string, flag?: boolean) {
     return this.findById(id);
   }
+
+  static updateUser(this: ReturnModelType<typeof User>, id: string, payload: Partial<User>) {
+    return this.updateOne({ _id: id }, payload);
+  }
 }
 
 const DefaultTransform = {
