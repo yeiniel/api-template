@@ -1,6 +1,8 @@
 import { User, UserModel } from './user';
 
 describe('models/user', () => {
+    afterEach(() => jest.restoreAllMocks());
+
     describe(User.name, () => {
        it('should exist', () => {
            // given
@@ -12,13 +14,17 @@ describe('models/user', () => {
 
     describe(UserModel.name, () => {
         describe(UserModel.getByEmail.name, () => {
-            it('should promise to return something', async () => {
+            it('should call findOne with email and return value', () => {
                 // given
+                const email = `some-id-${Math.floor(Math.random() * 1000)}@server.com`;
+                const findOneSpy = jest.spyOn(UserModel, 'findOne').mockResolvedValue(undefined);
+                
                 // when
-                const response = await UserModel.getByEmail();
+                const response = UserModel.getByEmail(email);
 
                 // then
-                expect(response).toBeDefined();
+                expect(findOneSpy).toHaveBeenCalledWith({ email });
+                expect(findOneSpy.mock.results[0].value).toBe(response);
             });
         });
     });
