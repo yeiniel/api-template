@@ -61,5 +61,22 @@ describe('models/user', () => {
                 expect(createSpy.mock.results[0].value).toEqual(response);
             })
         });
+
+        describe(UserModel.getUsers.name, () => {
+            it('should call paginate with input and return value', () => {
+                // given
+                const page = 0;
+                const limit = Infinity;
+                const filter = {}
+                const paginateSpy = jest.spyOn(UserModel, 'paginate').mockResolvedValue(undefined);
+
+                // when
+                const response = UserModel.getUsers(page, limit, filter);
+
+                // then
+                expect(paginateSpy).toHaveBeenCalledWith(filter, { page, limit });
+                expect(paginateSpy.mock.results[0].value).toEqual(response);
+            })
+        });
     });
 });
