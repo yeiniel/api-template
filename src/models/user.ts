@@ -29,6 +29,10 @@ export class User {
   static async add(this: ReturnModelType<typeof User>, input: User) {
     return this.create(input);
   }
+
+  static getById(this: ReturnModelType<typeof User>, id: string, flag?: boolean) {
+    return this.findById(id);
+  }
 }
 
 const DefaultTransform = {
