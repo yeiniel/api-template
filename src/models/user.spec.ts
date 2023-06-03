@@ -109,5 +109,20 @@ describe('models/user', () => {
                 expect(result).toBe(updateOneSpy.mock.results[0].value);
             });
         });
+
+        describe(UserModel.deleteById.name, () => {
+            it('should call deleteOne with { _id } and return value', () => {
+                // given
+                const userId = `some-id-${Math.floor(Math.random() * 1000)}`;
+                const deleteOneSpy = jest.spyOn(UserModel, 'deleteOne').mockResolvedValue({} as never);
+
+                // when
+                const result = UserModel.deleteById(userId);
+
+                // then
+                expect(deleteOneSpy).toHaveBeenCalledWith({ _id: userId});
+                expect(result).toBe(deleteOneSpy.mock.results[0].value);
+            });
+        });
     });
 });
