@@ -93,5 +93,21 @@ describe('models/user', () => {
                 expect(result).toBe(findByIdSpy.mock.results[0].value);
             });
         });
+
+        describe(UserModel.updateUser.name, () => {
+            it('should call updateOne with { _id }, payload and return value', () => {
+                // given
+                const userId = `some-id-${Math.floor(Math.random() * 1000)}`;
+                const payload = {};
+                const updateOneSpy = jest.spyOn(UserModel, 'updateOne').mockResolvedValue({} as never);
+
+                // when
+                const result = UserModel.updateUser(userId, payload);
+
+                // then
+                expect(updateOneSpy).toHaveBeenCalledWith({ _id: userId}, payload);
+                expect(result).toBe(updateOneSpy.mock.results[0].value);
+            });
+        });
     });
 });
