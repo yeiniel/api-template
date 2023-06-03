@@ -5,6 +5,10 @@ export class User {
 
   @prop()
   passwordResetToken?: string;
+
+  @prop()
+  passwordResetTokenExpires?: Date;
+  
   static async getByEmail(this: ReturnModelType<typeof User>, email: string, flag?: boolean) {
     return this.findOne({ email });
   }
