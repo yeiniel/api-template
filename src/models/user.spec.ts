@@ -1,4 +1,4 @@
-import { User } from './user';
+import { User, UserModel } from './user';
 
 describe('models/user', () => {
     describe(User.name, () => {
@@ -9,4 +9,15 @@ describe('models/user', () => {
            expect(User).toBeDefined();
        }); 
     });
-})
+
+    describe(UserModel.name, () => {
+        describe(UserModel.getByEmail.name, () => {
+            it('should exist', () => {
+                // given
+                // when
+                // then
+                expect(User.getByEmail).toBeDefined();
+            });
+        });
+    });
+});
