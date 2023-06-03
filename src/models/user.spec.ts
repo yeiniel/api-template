@@ -1,5 +1,19 @@
 import { User, UserModel } from './user';
 
+function setAndGetUserAttrTestFactory<T extends keyof User>(attr: T, valueFactory: () => User[T]) {
+    return () => {
+        // given
+        const user = new User();
+        const value = valueFactory();
+
+        // when
+        user[attr] = value;
+
+        // then
+        expect(user[attr]).toBe(value);
+    };
+}
+
 describe('models/user', () => {
     afterEach(() => jest.restoreAllMocks());
 
@@ -8,27 +22,13 @@ describe('models/user', () => {
 
         beforeEach(() => user = new User());
 
-        it('should provide passwordResetToken', () => {
-            // given
-            const token = `some-token-${Math.floor(Math.random() * 1000)}`;
+        it('should provide passwordResetToken',
+           setAndGetUserAttrTestFactory('passwordResetToken',
+                                        () => `some-token-${Math.floor(Math.random() * 1000)}`));
 
-            // when
-            user.passwordResetToken = token;
-
-            // then
-            expect(user.passwordResetToken).toBe(token);
-        });
-
-        it('should provide passwordResetTokenExpires', () => {
-            // given
-            const tokenExpires = new Date();
-
-            // when
-            user.passwordResetTokenExpires = tokenExpires;
-
-            // then
-            expect(user.passwordResetTokenExpires).toBe(tokenExpires);
-        });
+        it('should provide passwordResetTokenExpires',
+           setAndGetUserAttrTestFactory('passwordResetTokenExpires',
+                                        () => new Date()));
     });
 
     describe(UserModel.name, () => {
@@ -43,7 +43,7 @@ describe('models/user', () => {
 
                 // then
                 expect(findOneSpy).toHaveBeenCalledWith({ email });
-                expect(findOneSpy.mock.results[0].value).toBe(response);
+                expect(findOneSpy.mock.results[0].value).toEqual(response);
             });
         });
     });
