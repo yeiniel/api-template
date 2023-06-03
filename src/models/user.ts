@@ -37,6 +37,10 @@ export class User {
   static updateUser(this: ReturnModelType<typeof User>, id: string, payload: Partial<User>) {
     return this.updateOne({ _id: id }, payload);
   }
+
+  static deleteById(this: ReturnModelType<typeof User>, id: string) {
+    return this.deleteOne({ _id: id })
+  }
 }
 
 const DefaultTransform = {
