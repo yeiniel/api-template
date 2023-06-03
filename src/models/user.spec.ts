@@ -4,12 +4,20 @@ describe('models/user', () => {
     afterEach(() => jest.restoreAllMocks());
 
     describe(User.name, () => {
-       it('should exist', () => {
-           // given
-           // when
-           // then
-           expect(User).toBeDefined();
-       }); 
+        let user: User;
+
+        beforeEach(() => user = new User());
+
+        it('should provide passwordResetToken', () => {
+            // given
+            const token = `some-token-${Math.floor(Math.random() * 1000)}`;
+
+            // when
+            user.passwordResetToken = token;
+
+            // then
+            expect(user.passwordResetToken).toBe(token);
+        });
     });
 
     describe(UserModel.name, () => {
@@ -18,7 +26,7 @@ describe('models/user', () => {
                 // given
                 const email = `some-id-${Math.floor(Math.random() * 1000)}@server.com`;
                 const findOneSpy = jest.spyOn(UserModel, 'findOne').mockResolvedValue(undefined);
-                
+
                 // when
                 const response = UserModel.getByEmail(email);
 
