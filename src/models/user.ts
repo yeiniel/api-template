@@ -12,6 +12,10 @@ export class User {
   static async getByEmail(this: ReturnModelType<typeof User>, email: string, flag?: boolean) {
     return this.findOne({ email });
   }
+
+  static async add(this: ReturnModelType<typeof User>, input: User) {
+    return this.create(input);
+  }
 }
 
 const DefaultTransform = {
