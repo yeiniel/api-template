@@ -2,6 +2,9 @@ import { prop, getModelForClass, ReturnModelType, plugin, Ref } from '@typegoose
 import paginate from 'mongoose-paginate-v2';
 
 export class User {
+
+  @prop()
+  passwordResetToken?: string;
   static async getByEmail(this: ReturnModelType<typeof User>, email: string, flag?: boolean) {
     return this.findOne({ email });
   }
