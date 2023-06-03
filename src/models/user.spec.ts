@@ -46,5 +46,20 @@ describe('models/user', () => {
                 expect(findOneSpy.mock.results[0].value).toEqual(response);
             });
         });
+
+        describe(UserModel.add.name, () => {
+            it('should call create with input and return value', () => {
+                // given
+                const input = {};
+                const createSpy = jest.spyOn(UserModel, 'create').mockResolvedValue({} as never);
+
+                // when
+                const response = UserModel.add(input);
+
+                // then
+                expect(createSpy).toHaveBeenCalledWith(input);
+                expect(createSpy.mock.results[0].value).toEqual(response);
+            })
+        });
     });
 });
