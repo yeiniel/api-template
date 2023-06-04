@@ -27,8 +27,15 @@ export const refreshToken = async (refreshToken: string) => {
 };
 
 export const register = async (user: User) => {
-  // Your solution here
-  
+  try {
+    return await UserModel.add(user);
+  } catch (error) {
+    if (error.message.includes('duplicate key error collection')) {
+      return { exist: true }
+    }
+
+    return null;
+  }
 };
 
 export const forgotPassword = async (email: string) => {
